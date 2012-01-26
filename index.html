@@ -1,0 +1,205 @@
+<html>
+<head>
+	<style>
+html, body {
+	font-family: Tahoma;
+}
+
+ul {
+	list-style: none;
+}
+
+li {
+	position: relative;
+	background-color: #FFF000;
+	margin: 5px 5px 5px 5px;
+	padding: 5px 5px 5px 5px;
+	height: 50px;
+}
+
+li > * {
+	position: absolute;
+}
+
+li > div.rank {
+	width: 50px;
+	text-align: center;
+	color: #FFFFFF;
+	font-weight: bold;
+	font-size: 1.5em;
+	top: 15px;
+}
+
+li > div.track {
+	left: 60px;
+	font-weight: bold;
+	font-size: 1em;
+}
+
+li > div.artist {
+	left: 60px;
+	font-size: .8em;
+	top: 25px;
+}
+
+.albumCover {
+	width: 50px;
+	height: 50px;
+}
+	</style>
+	<script type="text/javascript" src="jquery-1.7.1.js"></script>
+
+	<script type="text/javascript">
+	$(document).ready(function(){
+		Top50.getChartForMonth("1984", 2);
+/*
+		Top50.getChartForMonth("1980", "9");
+		Top50.getChartForMonth("1980", "September");
+		Top50.getChartForMonth("1980", "sep");
+		Top50.getChartForMonth("1980", "");
+		Top50.getChartForMonth("1980", 14);
+		Top50.getChartForMonth("1980", "14");
+		Top50.getChartForMonth("2050", 9);
+		Top50.getChartForMonth("YEAR", 9);
+*/
+	});
+
+	Top50 = function(jQuery) {
+		// BILLBOARD API
+		var BILLBOARD_API_KEY = "y4jsbc3q29xrrmdpf4am84sx";
+		var BILLBOARD_CHART_ID = "379";
+		var CHARTS_URL = "http://api.billboard.com/apisvc/chart/v1/list?id=%CHART_ID%&sdate=%YEAR%-%MONTH%-10&edate=%YEAR%-%MONTH%-15&api_key=%API_KEY%&format=json&start=51";
+		var CHART_RECORDS_COUNT = 50;
+
+		// LAST.FM API
+		var LAST_FM_API_KEY = "8205c5b91c533ae09c682523971a569d";
+		var LAST_FM_TRACK_INFO = "http://ws.audioscrobbler.com/2.0/?method=track.getinfo&api_key=" + LAST_FM_API_KEY + "&artist=%ARTIST%&track=%TRACK%&format=json";
+
+		var $ = jQuery,
+			log = function(txt) { console.debug(txt) },
+			monthS = ["jan","feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"],
+			date = new Date();
+
+		function getChartForMonth(year, month) {
+			month = formatMonth(month);
+			year = formatYear(year);
+			
+			if (!month || !year) {
+				log("Unable to get the Charts for " + month + " and " + year);
+				return;
+			}
+			console.debug("Getting Charts for " + [month, year].join("."));
+			
+			getChart(function(chartItems) {
+					log(chartItems);
+					var resCount = chartItems.length;
+					//var resCount = 5;
+	
+					chartItems = chartItems.sort(function(a, b) {           
+						return a.rank - b.rank;
+					});
+
+					if (resCount > 0) {
+						for (var i=0; i<resCount; i++) {
+							var item = chartItems[i];
+							log(item.rank + "\t- " + item.song + " (" + item.artist + ")");
+							
+							var li = top50LiTemplate.replace("%RANK%", i+1)
+										.replace("%COVER_IDX%", i)
+										.replace("%TRACK%", item.song)
+										.replace("%ARTIST%", item.artist);
+
+							$(li).appendTo($("#top50List"));
+
+							getAlbumArt(i, item.artist, item.song);
+						}
+					}
+				}, 
+				year, 
+				month
+			);
+		}
+
+		var top50LiTemplate = '<li><img id="cover%COVER_IDX%" src="assets/defaultCover.jpg" class="albumCover" />' 
+			+ '<div class="rank">%RANK%</div>' 
+			+ '<div class="track">%TRACK%</div>' 
+			+ '<div class="artist">%ARTIST%</div></li>';
+ 
+		function getAlbumArt(coverIdx, artist, track) {
+			var url = LAST_FM_TRACK_INFO.replace("%ARTIST%", artist)
+				.replace("%TRACK%", track);
+				
+			$.ajax({
+				url: url,
+				dataType:"jsonp",
+				success: function(data) {
+					if (data.track.album) {
+						log(">>> " + data.track.album.image[0]["#text"]);
+						$("#cover" + coverIdx).attr("src", data.track.album.image[0]["#text"])
+					}
+				}
+			});
+		}
+
+		function getChart(successFunc, year, month, chartItems, startPos) {
+			if (!chartItems) { chartItems = []; }
+			if (!startPos) { startPos = 1; }
+
+			var url = CHARTS_URL.replace("%API_KEY%", BILLBOARD_API_KEY)
+				.replace("%CHART_ID%", BILLBOARD_CHART_ID)
+				.replace(/%YEAR%/g, year)
+				.replace(/%MONTH%/g, month);
+				
+			if (startPos) {
+				url += "&start=" + startPos;
+			}
+
+			$.ajax({
+				url: url,
+				dataType:"jsonp",
+				success: function(data) {
+					chartItems = chartItems.concat(data.searchResults.chartItem);
+					
+					if (chartItems.length < data.searchResults.totalRecords) {
+						startPos += CHART_RECORDS_COUNT;
+						getChart(successFunc, year, month, chartItems, startPos);
+					} else {
+						successFunc(chartItems);
+					}
+				}
+			});
+		}
+
+		function formatMonth(month) {
+			var t = !isNaN(parseInt(month)) ? "number" : typeof(month);
+
+			if (t == "number") {
+				return (month < 10) ? "0" + month : (month < 12) ? month : null;
+			}
+			else if (t == "string") {
+				var i = $.inArray(month.substr(0, 3).toLowerCase(), monthS);
+				if (i > -1) {
+					i++;
+					return (i < 10) ? "0" + i : (i < 12) ? i : null;
+				}
+			}
+			return null;
+		}
+
+		function formatYear(year) {
+			year = parseInt(year);
+			return !isNaN(year) ? (year <= date.getFullYear()) ? year : null : null;
+		}
+
+		return {
+			getChartForMonth: getChartForMonth
+		};
+	}(jQuery);
+	</script>
+</head>
+<body>
+	<ul id="top50List">
+		
+	</ul>
+</body>
+</html>
