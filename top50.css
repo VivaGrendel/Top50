@@ -1,0 +1,45 @@
+html, body {
+	font-family: Tahoma;
+}
+
+ul {
+	list-style: none;
+}
+
+li {
+	position: relative;
+	background-color: #FFF000;
+	margin: 5px 5px 5px 5px;
+	padding: 5px 5px 5px 5px;
+	height: 50px;
+}
+
+li > * {
+	position: absolute;
+}
+
+li > div.rank {
+	width: 50px;
+	text-align: center;
+	color: #FFFFFF;
+	font-weight: bold;
+	font-size: 1.5em;
+	top: 15px;
+}
+
+li > div.track {
+	left: 60px;
+	font-weight: bold;
+	font-size: 1em;
+}
+
+li > div.artist {
+	left: 60px;
+	font-size: .8em;
+	top: 25px;
+}
+
+.albumCover {
+	width: 50px;
+	height: 50px;
+}

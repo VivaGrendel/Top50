@@ -1,57 +1,63 @@
 <html>
 <head>
+	<link rel="stylesheet" type="text/css" href="top50.css" />
+
 	<style>
-html, body {
-	font-family: Tahoma;
+div {
+	display: block;
 }
 
-ul {
-	list-style: none;
+.spotifyPl {
+	right: 0px;
+	bottom: 0px;
+	cursor: pointer;
 }
 
-li {
-	position: relative;
-	background-color: #FFF000;
-	margin: 5px 5px 5px 5px;
-	padding: 5px 5px 5px 5px;
-	height: 50px;
+.spotifyPl:hover {
+	text-decoration: underline;
 }
 
-li > * {
+.dragContainer, .drag {
+	cursor: pointer;
+	width: 250px;
+	height: 80px;
+	overflow: hidden;
+}
+
+.dragContainer {
+	position: fixed;
+	display: none;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;	
+	top: 50%;
+	left: 50%;
+	margin-left: -125px;
+	margin-top: -40px;
+    outline: 0 none;
+    background-color: red;
+    border: 2px dotted black;
+	overflow: hidden;
+}
+
+.drag{
 	position: absolute;
+	z-index: 100000;
+	opacity: 0;
+	overflow: hidden;
 }
 
-li > div.rank {
-	width: 50px;
+.dragContainer > div#text {
+	position: absolute;
 	text-align: center;
-	color: #FFFFFF;
-	font-weight: bold;
-	font-size: 1.5em;
-	top: 15px;
-}
-
-li > div.track {
-	left: 60px;
-	font-weight: bold;
-	font-size: 1em;
-}
-
-li > div.artist {
-	left: 60px;
-	font-size: .8em;
-	top: 25px;
-}
-
-.albumCover {
-	width: 50px;
-	height: 50px;
 }
 	</style>
+
 	<script type="text/javascript" src="jquery-1.7.1.js"></script>
 
 	<script type="text/javascript">
 	$(document).ready(function(){
-		Top50.getChartForMonth("1984", 2);
+		Top50.getChartForMonth("1995", 9);
 /*
 		Top50.getChartForMonth("1980", "9");
 		Top50.getChartForMonth("1980", "September");
@@ -66,23 +72,29 @@ li > div.artist {
 
 	Top50 = function(jQuery) {
 		// BILLBOARD API
-		var BILLBOARD_API_KEY = "y4jsbc3q29xrrmdpf4am84sx";
-		var BILLBOARD_CHART_ID = "379";
-		var CHARTS_URL = "http://api.billboard.com/apisvc/chart/v1/list?id=%CHART_ID%&sdate=%YEAR%-%MONTH%-10&edate=%YEAR%-%MONTH%-15&api_key=%API_KEY%&format=json&start=51";
-		var CHART_RECORDS_COUNT = 50;
+		var BILLBOARD_API_KEY	= "y4jsbc3q29xrrmdpf4am84sx";
+		var BILLBOARD_CHART_ID	= "379";
+		var CHARTS_URL			= "http://api.billboard.com/apisvc/chart/v1/list?id=%CHART_ID%&sdate=%YEAR%-%MONTH%-10&edate=%YEAR%-%MONTH%-20&api_key=%API_KEY%&format=json";
+		var CHART_RECORDS_COUNT	= 50;
+		var MAX_CHART_NUM		= 50;
 
 		// LAST.FM API
-		var LAST_FM_API_KEY = "8205c5b91c533ae09c682523971a569d";
-		var LAST_FM_TRACK_INFO = "http://ws.audioscrobbler.com/2.0/?method=track.getinfo&api_key=" + LAST_FM_API_KEY + "&artist=%ARTIST%&track=%TRACK%&format=json";
+		var LAST_FM_API_KEY		= "8205c5b91c533ae09c682523971a569d";
+		var LAST_FM_TRACK_INFO	= "http://ws.audioscrobbler.com/2.0/?method=track.getinfo&api_key=" + LAST_FM_API_KEY + "&artist=%ARTIST%&track=%TRACK%&format=json";
+
+		// SPOTIFY METADATA API
+		var SPOTIFY_SEARCH		= "http://ws.spotify.com/search/1/track.json?q=track:%TRACK%%20%artist:%ARTIST%%20year:%YEAR%";
 
 		var $ = jQuery,
 			log = function(txt) { console.debug(txt) },
 			monthS = ["jan","feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"],
-			date = new Date();
+			date = new Date(),
+			playlist = [], currentYear = 0;
 
 		function getChartForMonth(year, month) {
 			month = formatMonth(month);
 			year = formatYear(year);
+			currentYear = year;
 			
 			if (!month || !year) {
 				log("Unable to get the Charts for " + month + " and " + year);
@@ -91,18 +103,19 @@ li > div.artist {
 			console.debug("Getting Charts for " + [month, year].join("."));
 			
 			getChart(function(chartItems) {
-					log(chartItems);
-					var resCount = chartItems.length;
-					//var resCount = 5;
-	
+					//var resCount = chartItems.length;
+					var resCount = 5;
+
 					chartItems = chartItems.sort(function(a, b) {           
 						return a.rank - b.rank;
 					});
 
 					if (resCount > 0) {
-						for (var i=0; i<resCount; i++) {
+						for (var i=0; i<MAX_CHART_NUM; i++) {
 							var item = chartItems[i];
-							log(item.rank + "\t- " + item.song + " (" + item.artist + ")");
+							//log(item);
+							playlist.push(item);
+							//log(item.rank + "\t- " + item.song + " (" + item.artist + ")");
 							
 							var li = top50LiTemplate.replace("%RANK%", i+1)
 										.replace("%COVER_IDX%", i)
@@ -113,6 +126,10 @@ li > div.artist {
 
 							getAlbumArt(i, item.artist, item.song);
 						}
+						
+						$('<div class="spotifyPl">Get Spotify Playlist</div>')
+							.click(getSpotifyPlaylist)
+							.appendTo('body')
 					}
 				}, 
 				year, 
@@ -123,20 +140,69 @@ li > div.artist {
 		var top50LiTemplate = '<li><img id="cover%COVER_IDX%" src="assets/defaultCover.jpg" class="albumCover" />' 
 			+ '<div class="rank">%RANK%</div>' 
 			+ '<div class="track">%TRACK%</div>' 
-			+ '<div class="artist">%ARTIST%</div></li>';
- 
+			+ '<div class="artist">%ARTIST%</div>'
+			+ '</li>';
+
 		function getAlbumArt(coverIdx, artist, track) {
 			var url = LAST_FM_TRACK_INFO.replace("%ARTIST%", artist)
 				.replace("%TRACK%", track);
-				
+
 			$.ajax({
 				url: url,
 				dataType:"jsonp",
 				success: function(data) {
 					if (data.track.album) {
-						log(">>> " + data.track.album.image[0]["#text"]);
+						//log(">>> " + data.track.album.image[0]["#text"]);
 						$("#cover" + coverIdx).attr("src", data.track.album.image[0]["#text"])
 					}
+				}
+			});
+		}
+
+		function getSpotifyPlaylist() {
+			var l = playlist.length;
+			var foundSpotifyUriIdx = 0;
+			var foundSpotifyUri = [];
+
+			if (l > 0) {
+				for (var i=0; i<l; i++) {
+					var item = playlist[i];
+					getSpotifyURI(i, item.song, item.artist, currentYear, function(idx, data) {
+						log(data);
+						foundSpotifyUriIdx++;
+						if (data.info.num_results > 0) {
+							foundSpotifyUri.push({idx:idx, href:data.tracks[0].href});
+						}
+						if (foundSpotifyUriIdx == l) {
+							foundSpotifyUri = foundSpotifyUri.sort(function(a, b) {           
+								return a.idx - b.idx;
+							});
+
+							var res = "";
+							for (var j=0; j<foundSpotifyUri.length; j++) {
+								res += foundSpotifyUri[j].href + " ";
+							}
+							log(res);
+							$(".drag").html('"' + res + '"');
+							$(".dragContainer").show("fast");
+							$(".dragContainer > div#text").html("Found " + foundSpotifyUri.length + " of the playlist tracks in Spotify.<br />Drag and drop this box in Spotify!")
+						}
+					});
+				}
+			}
+		}
+
+		function getSpotifyURI(i, track, artist, year, callBack) {
+			var url = SPOTIFY_SEARCH.replace("%TRACK%", encodeURIComponent(track))
+				.replace("%ARTIST%", encodeURIComponent(artist))
+				.replace("%YEAR%", (year-5)+"-"+year);
+
+			log(url);
+			$.ajax({
+				url: url,
+				dataType:"json",
+				success: function(data) {
+					callBack(i, data);
 				}
 			});
 		}
@@ -195,11 +261,33 @@ li > div.artist {
 			getChartForMonth: getChartForMonth
 		};
 	}(jQuery);
+
+	function selectText()
+	{
+		if (document.selection)
+		{
+			var div = document.body.createTextRange();
+
+			div.moveToElementText(document.getElementById("drag"));
+			div.select();
+		}
+		else
+		{
+			var div = document.createRange();
+
+			div.setStartBefore(document.getElementById("drag"));
+			div.setEndAfter(document.getElementById("drag")) ;
+
+			window.getSelection().addRange(div);
+		}
+	}
 	</script>
 </head>
 <body>
 	<ul id="top50List">
 		
 	</ul>
+	
+	<div class="dragContainer"><div id="text"></div><div id="drag" onmouseover="selectText();" class="drag"></div></div>
 </body>
 </html>
