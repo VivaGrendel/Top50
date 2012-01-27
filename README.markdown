@@ -4,6 +4,8 @@
 
 Discover which tracks were topping the world when you were born!!
 
+---
+
 ## History ##
 
 While playing around with some APIs let's at least try to make a kind of web app out of it.
@@ -16,7 +18,7 @@ So simply put your date of birth and let's find out!
 
 ---
 
-Now,
+> "TODO - Comment APIs used"
 
 // Spotify metadata API search URL
 http://ws.spotify.com/search/1/track.json?q=track:karma%20chameleon%20artist:culture%20club%20year:1980-1984
