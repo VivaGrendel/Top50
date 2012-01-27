@@ -18,7 +18,11 @@ So simply put your date of birth and let's find out!
 
 ---
 
-> "TODO - Comment APIs used"
+## APIs Use ##
+
+> "TODO"
+
+---
 
 ### Main API calls used ###
 
