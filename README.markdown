@@ -20,8 +20,13 @@ So simply put your date of birth and let's find out!
 
 > "TODO - Comment APIs used"
 
-// Spotify metadata API search URL
-http://ws.spotify.com/search/1/track.json?q=track:karma%20chameleon%20artist:culture%20club%20year:1980-1984
+### Main API calls used ###
 
-// Billboard API call used
-http://api.billboard.com/apisvc/chart/v1/list?id=379&sdate=1980-09-01&edate=1980-09-31&api_key=y4jsbc3q29xrrmdpf4am84sx&format=json
+// Billboard API call used (for Billboard TOP 100 chart)
+> "http://api.billboard.com/apisvc/chart/v1/list?id=379&sdate=1980-09-01&edate=1980-09-31&api_key=<API_KEY>&format=json"
+
+// Last FM (for album covers)
+> "http://ws.audioscrobbler.com/2.0/?method=track.getinfo&api_key=<API_KEY>&artist=<ARTIST_NAME>&track=<TRACK_TITLE>&format=json"
+
+// Spotify metadata API search URL
+> "http://ws.spotify.com/search/1/track.json?q=track:<TRACK_TITLE>%20artist:<ARTIST_NAME>%20year:<YEAR_RANGE>"
