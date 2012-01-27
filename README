@@ -1,3 +1,23 @@
+<h2>Top 50</h2>
+
+<h1>Description</h1>
+
+Discover which tracks were topping the world when you were born!!
+
+<h1>History</h1>
+
+While playing around with some APIs let's at least try to make a kind of web app out of it.
+
+Top 50 was a famous french TV show about music chart (http://www.youtube.com/watch?v=aL-2xBZlTqw).
+
+Basic/simple idea, what the heck was topping the chart the month you were born??? What was the world musical universe back then???
+
+So simply put your date of birth and let's find out!
+
+---
+
+Now,
+
 // Spotify metadata API search URL
 http://ws.spotify.com/search/1/track.json?q=track:karma%20chameleon%20artist:culture%20club%20year:1980-1984
 
