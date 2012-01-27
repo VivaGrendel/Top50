@@ -1,14 +1,14 @@
-<h2>Top 50</h2>
+# Top 50 #
 
-<h1>Description</h1>
+## Description ##
 
 Discover which tracks were topping the world when you were born!!
 
-<h1>History</h1>
+## History ##
 
 While playing around with some APIs let's at least try to make a kind of web app out of it.
 
-Top 50 was a famous french TV show about music chart (http://www.youtube.com/watch?v=aL-2xBZlTqw).
+Top 50 was a famous french TV show about music chart ([TV Show Opening](http://www.youtube.com/watch?v=aL-2xBZlTqw)).
 
 Basic/simple idea, what the heck was topping the chart the month you were born??? What was the world musical universe back then???
 
