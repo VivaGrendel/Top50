@@ -51,13 +51,23 @@ div {
 	position: absolute;
 	text-align: center;
 }
+
+.spotifyIcon {
+	position: absolute;
+	background-image: url("assets/spotify_na.png");
+	width: 32px;
+	height: 32px;
+	right: 5px;
+	bottom: 5px;
+}
 	</style>
 
 	<script type="text/javascript" src="jquery-1.7.1.js"></script>
 
 	<script type="text/javascript">
 	$(document).ready(function(){
-		Top50.getChartForMonth("2011", 9);
+		Top50.getChartForMonth("1984", 2);
+
 /*
 		Top50.getChartForMonth("1980", "9");
 		Top50.getChartForMonth("1980", "September");
@@ -89,11 +99,13 @@ div {
 			log = function(txt) { console.debug(txt) },
 			monthS = ["jan","feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"],
 			date = new Date(),
-			playlist = [], currentYear = 0;
+			playlist = [], currentYear = 0, spotifyPlaylist = [];
 
 		function getChartForMonth(year, month) {
 			month = formatMonth(month);
 			year = formatYear(year);
+
+			$("div.headerTitle").html(month + " . " + year);
 
 			currentYear = year;
 			
@@ -113,39 +125,64 @@ div {
 
 					if (resCount > 0) {
 						var max = Math.min(MAX_CHART_NUM, resCount);
+						playlist = new Array(max);
+
 						for (var i=0; i<max; i++) {
 							var item = chartItems[i];
 							//log(item);
 							playlist.push(item);
 							//log(item.rank + "\t- " + item.song + " (" + item.artist + ")");
 							
-							var li = top50LiTemplate.replace("%RANK%", i+1)
-										.replace("%COVER_IDX%", i)
-										.replace("%TRACK%", item.song)
-										.replace("%ARTIST%", item.artist);
-
-							$(li).appendTo($("#top50List"));
-
-							getAlbumArt(i, item.artist, item.song);
+							
+							var li = new ChartItem(item.rank, item.song , item.artist);
+							
+							$("#top50List").append(li.ui());
 						}
 						
-						$('<div class="spotifyPl">Get Spotify Playlist</div>')
-							.click(getSpotifyPlaylist)
-							.appendTo('body')
+						// $('<div class="spotifyPl">Get Spotify Playlist</div>')
+							// .click(getSpotifyPlaylist)
+							// .appendTo('body')
 					}
 				}, 
 				year, 
 				month
 			);
 		}
+		
+		var ChartItem = function(rank, title, artist) {
+			this.rank = rank;
+			this.title = title;
+			this.artist = artist;
 
-		var top50LiTemplate = '<li><img id="cover%COVER_IDX%" src="assets/defaultCover.jpg" class="albumCover" />' 
-			+ '<div class="rank">%RANK%</div>' 
-			+ '<div class="track">%TRACK%</div>' 
-			+ '<div class="artist">%ARTIST%</div>'
-			+ '</li>';
+			var ui = $('<li><img id="cover" src="assets/defaultCover.jpg" class="albumCover" />' 
+			+ '<div class="rank">' + this.rank + '</div>' 
+			+ '<div class="track">' + this.title + '</div>' 
+			+ '<div class="artist">' + this.artist + '</div>'
+			+ '<div class="spotifyIcon"></div>'
+			+ '</li>');
 
-		function getAlbumArt(coverIdx, artist, track) {
+			getAlbumCover(this.artist, this.title, albumCoverHandler);
+			getSpotifyURI(0, this.title, this.artist, currentYear, spotifyURIHandler)
+
+			function albumCoverHandler(cover) {
+				if (cover) {
+					ui.find("img#cover").attr("src", cover);
+				}
+			}
+
+			function spotifyURIHandler(i, data) {
+				if (data.info.num_results > 0) {
+					ui.find("div.spotifyIcon").css("background-image", "url('assets/spotify.png')");
+					s//potifyPlaylist.push[{idx:idx, href:data.tracks[0].href}]
+				}
+			}
+
+			this.ui = function() {
+				return ui;
+			}
+		}
+
+		function getAlbumCover(artist, track, callback) {
 			var url = LAST_FM_TRACK_INFO.replace("%ARTIST%", artist)
 				.replace("%TRACK%", track);
 
@@ -153,9 +190,10 @@ div {
 				url: url,
 				dataType:"jsonp",
 				success: function(data) {
-					if (data.track.album) {
+					if (data.track.album && callback) {
+						callback(data.track.album.image[0]["#text"]);
 						//log(">>> " + data.track.album.image[0]["#text"]);
-						$("#cover" + coverIdx).attr("src", data.track.album.image[0]["#text"])
+						//$("#cover" + coverIdx).attr("src", data.track.album.image[0]["#text"]);
 					}
 				}
 			});
@@ -305,10 +343,60 @@ div {
 	</script>
 </head>
 <body>
-	<ul id="top50List">
-		
-	</ul>
+	<style>
 	
-	<div class="dragContainer"><div id="text"></div><div id="drag" onmouseover="selectText();" class="drag"></div></div>
+.header {
+	position: absolute;
+	top: 0px;
+	text-align: center;
+	width: 100%;
+	background-color: #000000;
+}
+
+.topShadow {
+	position: absolute;
+	top: 275px;
+	background: url("assets/topShadow.png") repeat-x;
+	width: 100%;
+	height: 10px;
+}
+
+.headerTitle {
+	color: #FFFFFF;
+	font-weight: bold;
+	font-size: 24px;
+}
+
+.contentWrapper {
+	height:100%;
+	overflow:auto;
+	margin-top: 275px;
+}
+
+* html body{
+	overflow:hidden;
+}
+
+* html div.contentWrapper{
+	height:100%;
+	overflow:auto;
+}
+	</style>	
+
+	<div class="header">
+		<img src="assets/top50.png" />
+		<div class="headerTitle"></div>
+	</div>
+
+	<div class="contentWrapper">
+		
+			<ul id="top50List">
+			</ul>
+			
+		
+		<div class="dragContainer"><div id="text"></div><div id="drag" onmouseover="selectText();" class="drag"></div></div>
+	</div>
+	<div class="topShadow"></div>
+
 </body>
 </html>
