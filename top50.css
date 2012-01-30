@@ -14,45 +14,69 @@ ul {
 li {
 	position: relative;
 	background-color: #ACACAC;
-	margin: 15px;
+	margin: 30px;
 	padding: 10px;
 	height: 50px;
+	left: 50px;
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
+	-webkit-box-shadow: 0px 0px 5px 3px rgba(0, 0, 0, .5);
+	-moz-box-shadow: 0px 0px 5px 3px rgba(0, 0, 0, .5);
+	box-shadow: 0px 0px 5px 3px rgba(0, 0, 0, .5);
 }
 
 li > * {
 	position: absolute;
 }
 
+li > div.hash {
+	text-align: center;
+	color: #CCCCCC;
+	font-size: 4em;
+	font-family: 'Lobster', cursive;
+	left: -70px;
+}
+
 li > div.rank {
-	width: 50px;
 	text-align: center;
 	color: #FFFFFF;
 	font-weight: bold;
-	font-size: 1.5em;
-	top: 15px;
+	font-size: 2.5em;
+	left: -70px;
+	top: 10px;
+	text-shadow: -3px 3px 0px #000000;
+	filter: dropshadow(color=#000000, offx=-3, offy=3);
 }
 
 li > div.track {
-	/*font: 1.2em 'ImpactLabelReversedRegular', Arial, sans-serif;*/
 	font-family: 'Lobster', cursive;
 	font-weight: 200;
-	left: 65px;
 	font-size: 1.5em;
+	left: 75px;
+	right: 45px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	-o-text-overflow: ellipsis;
+	-ms-text-overflow: ellipsis;
+	text-shadow: -1px 1px 0px #ffffff;
+	filter: dropshadow(color=#ffffff, offx=-1, offy=1);
 }
 
 li > div.artist {
-	/*font: 1em 'ImpactLabelReversedRegular', Arial, sans-serif;*/
 	font-family: 'Lobster', cursive;
 	font-size: 1em;
 	font-weight: 200;
-	left: 70px;
+	left: 80px;
+	right: 45px;
 	top: 40px;
 }
 
 .albumCover {
 	width: 50px;
 	height: 50px;
+	-webkit-box-shadow: 0px 0px 5px 2px #FFFFFF;
+	-moz-box-shadow: 0px 0px 5px 2px #FFFFFF;
+	box-shadow: 0px 0px 5px 2px #FFFFFF;
 }

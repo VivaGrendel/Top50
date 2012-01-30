@@ -3,12 +3,11 @@
 	<link rel="stylesheet" type="text/css" href="top50.css" />
 
 	<!-- FONTS -->
-	<link rel="stylesheet" href="assets/Impact-Label-fontfacekit/stylesheet.css" type="text/css" charset="utf-8">
 	<link href='http://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
 
 	<style>
 div {
-	display: block;
+	display: inline;
 }
 
 .spotifyPl {
@@ -80,8 +79,12 @@ div {
 			
 			console.debug(y + " - " + m);
 		}
+		
+		$("#monthChoice div.option").click(function() {
+			$("#monthChoice #value").html($(this).attr("data"));
+		});
 
-		Top50.getChartForMonth(y, m);
+//		Top50.getChartForMonth(y, m);
 
 /*
 		Top50.getChartForMonth("1980", "9");
@@ -130,7 +133,7 @@ div {
 			$("div.headerTitle").html(month + " . " + year);
 
 			console.debug("Getting Charts for " + [month, year].join("."));
-			
+
 			getChart(function(chartItems) {
 					var resCount = chartItems.length;
 					//var resCount = 5;
@@ -145,19 +148,12 @@ div {
 
 						for (var i=0; i<max; i++) {
 							var item = chartItems[i];
-							//log(item);
 							playlist.push(item);
-							//log(item.rank + "\t- " + item.song + " (" + item.artist + ")");
-							
-							
+
 							var li = new ChartItem(item.rank, item.song , item.artist);
-							
+
 							$("#top50List").append(li.ui());
 						}
-						
-						// $('<div class="spotifyPl">Get Spotify Playlist</div>')
-							// .click(getSpotifyPlaylist)
-							// .appendTo('body')
 					}
 				}, 
 				year, 
@@ -171,6 +167,7 @@ div {
 			this.artist = artist;
 
 			var ui = $('<li><img id="cover" src="assets/defaultCover.jpg" class="albumCover" />' 
+			// + '<div class="hash">#</div>' 
 			+ '<div class="rank">' + this.rank + '</div>' 
 			+ '<div class="track">' + this.title + '</div>' 
 			+ '<div class="artist">' + this.artist + '</div>'
@@ -189,7 +186,7 @@ div {
 			function spotifyURIHandler(i, data) {
 				if (data.info.num_results > 0) {
 					ui.find("div.spotifyIcon").css("background-image", "url('assets/spotify.png')");
-					s//potifyPlaylist.push[{idx:idx, href:data.tracks[0].href}]
+					//spotifyPlaylist.push[{idx:idx, href:data.tracks[0].href}]
 				}
 			}
 
@@ -206,7 +203,7 @@ div {
 				url: url,
 				dataType:"jsonp",
 				success: function(data) {
-					if (data.track.album && callback) {
+					if (data.track && data.track.album && callback) {
 						callback(data.track.album.image[0]["#text"]);
 						//log(">>> " + data.track.album.image[0]["#text"]);
 						//$("#cover" + coverIdx).attr("src", data.track.album.image[0]["#text"]);
@@ -251,7 +248,8 @@ div {
 		function getSpotifyURI(i, track, artist, year, callBack) {
 			var url = SPOTIFY_SEARCH.replace("%TRACK%", encodeURIComponent(track))
 				.replace("%ARTIST%", encodeURIComponent(artist))
-				.replace("%YEAR%", (year-5)+"-"+year);
+				.replace("%YEAR%", (year-5)+"-2010");
+//				.replace("%YEAR%", (year-5)+"-"+year);
 
 			log(url);
 			$.ajax({
@@ -357,6 +355,10 @@ div {
 			window.getSelection().addRange(div);
 		}
 	}
+	
+	function dropdownClickHandler() {
+		$("#monthChoice > div.options").toggle();
+	}
 	</script>
 </head>
 <body>
@@ -367,6 +369,7 @@ div {
 	height: 275px;
 	width: 100%;
 	background-color: #000000;
+	display: block;
 }
 
 .topShadow {
@@ -382,13 +385,93 @@ div {
 	font-weight: bold;
 	font-size: 24px;
 }
+
+select {
+	color: #000000;
+	font-size: 2em;
+}
+
+.white {
+	color: white;
+}
+
+.option {
+	float: left;
+}
+
+.dropdown {
+	position: relative;
+	text-align: center;
+	margin: 10px;
+	padding: 3px;
+	background-color: #333333;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+}
+
+#monthChoice #value {
+	width: 100%;
+	text-align: center;
+}
+
+.dropdown > div.options {
+	left: 50%;
+    margin-left: -180px;
+    margin-top: 35px;
+    position: absolute;
+    text-align: center;
+    width: 360px;
+    display: none;
+}
+
+div.options > div.option {
+	width: 30px;
+}
 	</style>	
 
 	<div class="header">
 		<img src="assets/top50.png" />
 		<div class="headerTitle"></div>
+	
+		<BR>
+		<div id="monthChoice" onclick="dropdownClickHandler();" class="dropdown white">
+			<div id="value">MONTH</div>
+
+			<div class="options">
+				<div data="01" class="option">01</div>
+				<div data="02" class="option">02</div>
+				<div data="03" class="option">03</div>
+				<div data="04" class="option">04</div>
+				<div data="05" class="option">05</div>
+				<div data="06" class="option">06</div>
+				<div data="07" class="option">07</div>
+				<div data="08" class="option">08</div>
+				<div data="09" class="option">09</div>
+				<div data="10" class="option">10</div>
+				<div data="11" class="option">11</div>
+				<div data="12" class="option">12</div>
+			</div>
+		</div>
+		
+		<div class="white">. 1980</div>
+<!-- 		<SELECT NAME="mylist">
+			<OPTION VALUE="1">01</OPTION>
+			<OPTION VALUE="2">02</OPTION>
+			<OPTION VALUE="3">03</OPTION>
+			<OPTION VALUE="4">04</OPTION>
+			<OPTION VALUE="5">05</OPTION>
+			<OPTION VALUE="6">06</OPTION>
+			<OPTION VALUE="7">07</OPTION>
+			<OPTION VALUE="8">08</OPTION>
+			<OPTION VALUE="9">09</OPTION>
+			<OPTION VALUE="10">10</OPTION>
+			<OPTION VALUE="11">11</OPTION>
+			<OPTION VALUE="12">12</OPTION>
+		</SELECT> -->
 	</div>
 
+	<span>.</span>
 	<div class="contentWrapper">
 		
 			<ul id="top50List">
