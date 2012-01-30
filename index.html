@@ -2,6 +2,10 @@
 <head>
 	<link rel="stylesheet" type="text/css" href="top50.css" />
 
+	<!-- FONTS -->
+	<link rel="stylesheet" href="assets/Impact-Label-fontfacekit/stylesheet.css" type="text/css" charset="utf-8">
+	<link href='http://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
+
 	<style>
 div {
 	display: block;
@@ -66,7 +70,18 @@ div {
 
 	<script type="text/javascript">
 	$(document).ready(function(){
-		Top50.getChartForMonth("1984", 2);
+		var m = "2";
+		var y = "1984";
+
+		var l = location.search.length;
+		if (l > 0) {
+			y = location.search.substr(1, 4);
+			m = location.search.substr(6, l);
+			
+			console.debug(y + " - " + m);
+		}
+
+		Top50.getChartForMonth(y, m);
 
 /*
 		Top50.getChartForMonth("1980", "9");
@@ -105,14 +120,15 @@ div {
 			month = formatMonth(month);
 			year = formatYear(year);
 
-			$("div.headerTitle").html(month + " . " + year);
-
-			currentYear = year;
-			
 			if (!month || !year) {
 				log("Unable to get the Charts for " + month + " and " + year);
 				return;
 			}
+
+			currentYear = year;
+
+			$("div.headerTitle").html(month + " . " + year);
+
 			console.debug("Getting Charts for " + [month, year].join("."));
 			
 			getChart(function(chartItems) {
@@ -299,6 +315,7 @@ div {
 			var t = !isNaN(parseInt(month)) ? "number" : typeof(month);
 
 			if (t == "number") {
+				month = Number(month);
 				return (month < 10) ? "0" + month : (month < 12) ? month : null;
 			}
 			else if (t == "string") {
@@ -346,9 +363,8 @@ div {
 	<style>
 	
 .header {
-	position: absolute;
-	top: 0px;
 	text-align: center;
+	height: 275px;
 	width: 100%;
 	background-color: #000000;
 }
@@ -365,21 +381,6 @@ div {
 	color: #FFFFFF;
 	font-weight: bold;
 	font-size: 24px;
-}
-
-.contentWrapper {
-	height:100%;
-	overflow:auto;
-	margin-top: 275px;
-}
-
-* html body{
-	overflow:hidden;
-}
-
-* html div.contentWrapper{
-	height:100%;
-	overflow:auto;
 }
 	</style>	
 

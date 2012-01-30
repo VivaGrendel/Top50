@@ -1,6 +1,6 @@
 html, body {
 	margin: 0px auto;
-	padding: 0px auto;
+	padding: 0px;
 	font-family: Tahoma;
 	background-color: #2E2E2E;
 }
@@ -36,15 +36,20 @@ li > div.rank {
 }
 
 li > div.track {
+	/*font: 1.2em 'ImpactLabelReversedRegular', Arial, sans-serif;*/
+	font-family: 'Lobster', cursive;
+	font-weight: 200;
 	left: 65px;
-	font-weight: bold;
-	font-size: 1em;
+	font-size: 1.5em;
 }
 
 li > div.artist {
-	left: 65px;
-	font-size: .8em;
-	top: 28px;
+	/*font: 1em 'ImpactLabelReversedRegular', Arial, sans-serif;*/
+	font-family: 'Lobster', cursive;
+	font-size: 1em;
+	font-weight: 200;
+	left: 70px;
+	top: 40px;
 }
 
 .albumCover {
