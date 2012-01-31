@@ -84,7 +84,7 @@ div {
 			$("#monthChoice #value").html($(this).attr("data"));
 		});
 
-//		Top50.getChartForMonth(y, m);
+		Top50.getChartForMonth(y, m);
 
 /*
 		Top50.getChartForMonth("1980", "9");
@@ -102,7 +102,8 @@ div {
 		// BILLBOARD API
 		var BILLBOARD_API_KEY	= "y4jsbc3q29xrrmdpf4am84sx";
 		var BILLBOARD_CHART_ID	= "379";
-		var CHARTS_URL			= "http://api.billboard.com/apisvc/chart/v1/list?id=%CHART_ID%&sdate=%YEAR%-%MONTH%-%DAY%&edate=%YEAR%-%MONTH%-%DAY%&api_key=%API_KEY%&format=json";
+//		var CHARTS_URL			= "http://api.billboard.com/apisvc/chart/v1/list?id=%CHART_ID%&sdate=%YEAR%-%MONTH%-%DAY%&edate=%YEAR%-%MONTH%-%DAY%&api_key=%API_KEY%&format=json";
+		var CHARTS_URL			= "http://api.billboard.com/apisvc/chart/v1/list?artist=Jackson&sdate=2003-10-10&edate=2008-08-08&api_key=%API_KEY%&format=json";
 		var CHART_RECORDS_COUNT	= 50;
 		var MAX_CHART_NUM		= 50;
 
@@ -112,6 +113,11 @@ div {
 
 		// SPOTIFY METADATA API
 		var SPOTIFY_SEARCH		= "http://ws.spotify.com/search/1/track.json?q=track:%TRACK%%20%artist:%ARTIST%%20year:%YEAR%";
+
+		// YOUTUBE VIDEO FEED API
+		var YOUTUBE_SEARCH = "https://gdata.youtube.com/feeds/api/videos?q=%QUERY%&alt=json";
+
+
 
 		var $ = jQuery,
 			log = function(txt) { console.debug(txt) },
@@ -175,7 +181,8 @@ div {
 			+ '</li>');
 
 			getAlbumCover(this.artist, this.title, albumCoverHandler);
-			getSpotifyURI(0, this.title, this.artist, currentYear, spotifyURIHandler)
+			//getSpotifyURI(0, this.title, this.artist, currentYear, spotifyURIHandler)
+			getYoutubeVIdeo(this.artist, this.title, youtubeVideoHandler);
 
 			function albumCoverHandler(cover) {
 				if (cover) {
@@ -190,9 +197,25 @@ div {
 				}
 			}
 
+			function youtubeVideoHandler(data) {
+				log(data);
+			}
+
 			this.ui = function() {
 				return ui;
 			}
+		}
+
+		function getYoutubeVIdeo(artist, track, callback) {
+			var url = YOUTUBE_SEARCH.replace("%QUERY%", encodeURIComponent(artist + " " + track));
+
+			$.ajax({
+				url: url,
+				dataType:"jsonp",
+				success: function(data) {
+					callback(data);
+				}
+			});
 		}
 
 		function getAlbumCover(artist, track, callback) {
