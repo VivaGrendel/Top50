@@ -66,6 +66,7 @@ div {
 	</style>
 
 	<script type="text/javascript" src="jquery-1.7.1.js"></script>
+	<script type="text/javascript" src="md5.js"></script>
 
 	<script type="text/javascript">
 	$(document).ready(function(){
@@ -117,11 +118,14 @@ div {
 		// YOUTUBE VIDEO FEED API
 		var YOUTUBE_SEARCH = "https://gdata.youtube.com/feeds/api/videos?q=%QUERY%&alt=json";
 
+		// ROVIO API
+		var ROVIO_API_KEY			= "bsvyd2g7bp6qm4ggqgb3cadu";
+		var ROVIO_SECRET			= "vSRCPAgFx2";
+		var ROVIO_RELEASE_BY_DATE	= "http://api.rovicorp.com/search/v2/music/filterbrowse?apikey=%API_KEY%&facet=type&entitytype=album&filter=releasedate%3E%START_DATE%&filter=releasedate%3C%END_DATE%";
+
 		/*
 		// http://developer.rovicorp.com/docs
-		bsvyd2g7bp6qm4ggqgb3cadu
 		vSRCPAgFx2
-		http://api.rovicorp.com/search/v2/music/filterbrowse?apikey=bsvyd2g7bp6qm4ggqgb3cadu&sig=vSRCPAgFx2&facet=type&format=json&entitytype=album&filter=releasedate%3E19850201&filter=releasedate%3C19850228&size=100
 
 		var curdate = new Date();
 		var gmtstring = curdate.toGMTString();
@@ -150,31 +154,38 @@ div {
 
 			console.debug("Getting Charts for " + [month, year].join("."));
 
-			getChart(function(chartItems) {
-					var resCount = chartItems.length;
-					//var resCount = 5;
-
-					chartItems = chartItems.sort(function(a, b) {           
-						return a.rank - b.rank;
-					});
-
-					if (resCount > 0) {
-						var max = Math.min(MAX_CHART_NUM, resCount);
-						playlist = new Array(max);
-
-						for (var i=0; i<max; i++) {
-							var item = chartItems[i];
-							playlist.push(item);
-
-							var li = new ChartItem(item.rank, item.song , item.artist);
-
-							$("#top50List").append(li.ui());
-						}
-					}
+			getChartROVIO(function(chartItems) {
+					console.debug(chartItems);
 				}, 
 				year, 
 				month
 			);
+
+			// getChart(function(chartItems) {
+					// var resCount = chartItems.length;
+					// //var resCount = 5;
+// 
+					// chartItems = chartItems.sort(function(a, b) {           
+						// return a.rank - b.rank;
+					// });
+// 
+					// if (resCount > 0) {
+						// var max = Math.min(MAX_CHART_NUM, resCount);
+						// playlist = new Array(max);
+// 
+						// for (var i=0; i<max; i++) {
+							// var item = chartItems[i];
+							// playlist.push(item);
+// 
+							// var li = new ChartItem(item.rank, item.song , item.artist);
+// 
+							// $("#top50List").append(li.ui());
+						// }
+					// }
+				// }, 
+				// year, 
+				// month
+			// );
 		}
 		
 		var ChartItem = function(rank, title, artist) {
@@ -308,6 +319,32 @@ div {
 			//d = new Date(year, month, sat);
 			log(">>> " + sat + " ### " + d.getDay());
 			return sat;		
+		}
+
+		function getChartROVIO(successFunc, year, month) {
+			var day = getDayFromDate(year, month);
+
+			var url = ROVIO_RELEASE_BY_DATE.replace("%API_KEY%", ROVIO_API_KEY)
+				.replace("%START_DATE%", year+month+"01")
+				.replace("%END_DATE%", year+month+"25");
+				
+			var curdate = new Date();
+			var gmtstring = curdate.toGMTString();
+			var utc = Date.parse(gmtstring) / 1000;
+			var sig = calcMD5(ROVIO_API_KEY + ROVIO_SECRET + utc);
+
+			url += "&sig=" + sig;
+
+			$.ajax({
+				url: url,
+				dataType:"xml",
+				success: function(data) {
+					successFunc(data);
+				},
+				complete: function(data) {
+					successFunc(data);
+				}
+			});
 		}
 
 		function getChart(successFunc, year, month, chartItems, startPos) {
@@ -515,5 +552,6 @@ div.options > div.option {
 	</div>
 	<div class="topShadow"></div>
 
+	<?php print phpinfo(); ?>
 </body>
 </html>
