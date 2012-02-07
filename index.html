@@ -123,15 +123,9 @@ div {
 		var ROVIO_SECRET			= "vSRCPAgFx2";
 		var ROVIO_RELEASE_BY_DATE	= "http://api.rovicorp.com/search/v2/music/filterbrowse?apikey=%API_KEY%&facet=type&entitytype=album&filter=releasedate%3E%START_DATE%&filter=releasedate%3C%END_DATE%";
 
-		/*
-		// http://developer.rovicorp.com/docs
-		vSRCPAgFx2
-
-		var curdate = new Date();
-		var gmtstring = curdate.toGMTString();
-		var utc = Date.parse(gmtstring) / 1000;
-		calcMD5("message digest")
-		*/
+		// TOP50 NODESTER API WRAPPER
+		var TOP50_RELEASES_URL	= "http://top50.nodester.com/releases/%YEAR%/%MONTH%";
+		var TOP50_CHART_URL		= "http://top50.nodester.com/chart/%YEAR%/%MONTH%";
 
 		var $ = jQuery,
 			log = function(txt) { console.debug(txt) },
@@ -324,24 +318,20 @@ div {
 		function getChartROVIO(successFunc, year, month) {
 			var day = getDayFromDate(year, month);
 
-			var url = ROVIO_RELEASE_BY_DATE.replace("%API_KEY%", ROVIO_API_KEY)
-				.replace("%START_DATE%", year+month+"01")
-				.replace("%END_DATE%", year+month+"25");
-				
-			var curdate = new Date();
-			var gmtstring = curdate.toGMTString();
-			var utc = Date.parse(gmtstring) / 1000;
-			var sig = calcMD5(ROVIO_API_KEY + ROVIO_SECRET + utc);
-
-			url += "&sig=" + sig;
+			var url = TOP50_RELEASES_URL.replace("%YEAR%", year)
+				.replace("%MONTH%", month);
 
 			$.ajax({
-				url: url,
-				dataType:"xml",
+				url: "http://top50.nodester.com/json",
+				dataType:"jsonp",
+				jsonpCallback:"cb",
 				success: function(data) {
 					successFunc(data);
 				},
 				complete: function(data) {
+					successFunc(data);
+				},
+				error: function(data) {
 					successFunc(data);
 				}
 			});
