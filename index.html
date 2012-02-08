@@ -55,6 +55,15 @@ div {
 	text-align: center;
 }
 
+#spotifyLink {
+	position: absolute;
+	background-image: url("assets/spotify_na.png");
+	width: 32px;
+	height: 32px;
+	right: 5px;
+	bottom: 5px;
+} 
+
 .spotifyIcon {
 	position: absolute;
 	background-image: url("assets/spotify_na.png");
@@ -111,9 +120,11 @@ div {
 		// LAST.FM API
 		var LAST_FM_API_KEY		= "8205c5b91c533ae09c682523971a569d";
 		var LAST_FM_TRACK_INFO	= "http://ws.audioscrobbler.com/2.0/?method=track.getinfo&api_key=" + LAST_FM_API_KEY + "&artist=%ARTIST%&track=%TRACK%&format=json";
+		var LAST_FM_ALBUM_INFO	= "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=" + LAST_FM_API_KEY + "&artist=%ARTIST%&album=%TITLE%&format=json";
 
 		// SPOTIFY METADATA API
-		var SPOTIFY_SEARCH		= "http://ws.spotify.com/search/1/track.json?q=track:%TRACK%%20%artist:%ARTIST%%20year:%YEAR%";
+		var SPOTIFY_TRACK_SEARCH		= "http://ws.spotify.com/search/1/track.json?q=track:%TRACK%%20artist:%ARTIST%%20year:%YEAR%";
+		var SPOTIFY_ALBUM_SEARCH		= "http://ws.spotify.com/search/1/album.json?q=album:%TRACK%%20artist:%ARTIST%";
 
 		// YOUTUBE VIDEO FEED API
 		var YOUTUBE_SEARCH = "https://gdata.youtube.com/feeds/api/videos?q=%QUERY%&alt=json";
@@ -124,7 +135,8 @@ div {
 		var ROVIO_RELEASE_BY_DATE	= "http://api.rovicorp.com/search/v2/music/filterbrowse?apikey=%API_KEY%&facet=type&entitytype=album&filter=releasedate%3E%START_DATE%&filter=releasedate%3C%END_DATE%";
 
 		// TOP50 NODESTER API WRAPPER
-		var TOP50_RELEASES_URL	= "http://top50.nodester.com/releases/%YEAR%/%MONTH%";
+		var TOP50_RELEASES_URL	= "http://localhost:14196/releases/%YEAR%/%MONTH%";
+//		var TOP50_RELEASES_URL	= "http://top50.nodester.com/releases/%YEAR%/%MONTH%";
 		var TOP50_CHART_URL		= "http://top50.nodester.com/chart/%YEAR%/%MONTH%";
 
 		var $ = jQuery,
@@ -149,6 +161,14 @@ div {
 			console.debug("Getting Charts for " + [month, year].join("."));
 
 			getChartROVIO(function(chartItems) {
+					for (var i=0; i<chartItems.length; i++) {
+						var item = chartItems[i];
+						playlist.push(item);
+
+						var li = new ChartItem(i+1, item.title , item.artist);
+
+						$("#top50List").append(li.ui());
+					}
 					console.debug(chartItems);
 				}, 
 				year, 
@@ -192,11 +212,11 @@ div {
 			+ '<div class="rank">' + this.rank + '</div>' 
 			+ '<div class="track">' + this.title + '</div>' 
 			+ '<div class="artist">' + this.artist + '</div>'
-			+ '<div class="spotifyIcon"></div>'
+			+ '<a id="spotifyLink"></a>'
 			+ '</li>');
 
 			getAlbumCover(this.artist, this.title, albumCoverHandler);
-			//getSpotifyURI(0, this.title, this.artist, currentYear, spotifyURIHandler)
+			getSpotifyURI(0, this.title, this.artist, currentYear, spotifyURIHandler)
 			getYoutubeVIdeo(this.artist, this.title, youtubeVideoHandler);
 
 			function albumCoverHandler(cover) {
@@ -207,7 +227,11 @@ div {
 
 			function spotifyURIHandler(i, data) {
 				if (data.info.num_results > 0) {
-					ui.find("div.spotifyIcon").css("background-image", "url('assets/spotify.png')");
+					ui.find("#spotifyLink").css({
+						"background-image": "url('assets/spotify.png')",
+						"pointer": "cursor"
+					});
+					ui.find("#spotifyLink").attr("href", data.albums[0].href);
 					//spotifyPlaylist.push[{idx:idx, href:data.tracks[0].href}]
 				}
 			}
@@ -233,16 +257,16 @@ div {
 			});
 		}
 
-		function getAlbumCover(artist, track, callback) {
-			var url = LAST_FM_TRACK_INFO.replace("%ARTIST%", artist)
-				.replace("%TRACK%", track);
+		function getAlbumCover(artist, album, callback) {
+			var url = LAST_FM_ALBUM_INFO.replace("%ARTIST%", artist)
+				.replace("%TITLE%", album);
 
 			$.ajax({
 				url: url,
 				dataType:"jsonp",
 				success: function(data) {
-					if (data.track && data.track.album && callback) {
-						callback(data.track.album.image[0]["#text"]);
+					if (data.album && callback) {
+						callback(data.album.image[0]["#text"]);
 						//log(">>> " + data.track.album.image[0]["#text"]);
 						//$("#cover" + coverIdx).attr("src", data.track.album.image[0]["#text"]);
 					}
@@ -284,7 +308,7 @@ div {
 		}
 
 		function getSpotifyURI(i, track, artist, year, callBack) {
-			var url = SPOTIFY_SEARCH.replace("%TRACK%", encodeURIComponent(track))
+			var url = SPOTIFY_ALBUM_SEARCH.replace("%TRACK%", encodeURIComponent(track))
 				.replace("%ARTIST%", encodeURIComponent(artist))
 				.replace("%YEAR%", (year-5)+"-2010");
 //				.replace("%YEAR%", (year-5)+"-"+year);
@@ -321,20 +345,18 @@ div {
 			var url = TOP50_RELEASES_URL.replace("%YEAR%", year)
 				.replace("%MONTH%", month);
 
+			console.debug(url);
+
 			$.ajax({
-				url: "http://top50.nodester.com/json",
+				url: url,
 				dataType:"jsonp",
-				jsonpCallback:"cb",
-				success: function(data) {
-					successFunc(data);
-				},
-				complete: function(data) {
-					successFunc(data);
-				},
-				error: function(data) {
-					successFunc(data);
-				}
+				success: successFunc,
+				error: dispatchError
 			});
+		}
+
+		function dispatchError(data) {
+			console.debug(data);
 		}
 
 		function getChart(successFunc, year, month, chartItems, startPos) {
