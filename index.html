@@ -165,7 +165,7 @@ div {
 						var item = chartItems[i];
 						playlist.push(item);
 
-						var li = new ChartItem(i+1, item.title , item.artist);
+						var li = new ChartItem(i+1, item.title, item.artist, item.cover);
 
 						$("#top50List").append(li.ui());
 					}
@@ -202,12 +202,13 @@ div {
 			// );
 		}
 		
-		var ChartItem = function(rank, title, artist) {
-			this.rank = rank;
-			this.title = title;
-			this.artist = artist;
+		var ChartItem = function(rank, title, artist, cover) {
+			this.rank	= rank;
+			this.title	= title;
+			this.artist	= artist;
+			this.cover	= cover ? cover : "assets/defaultCover.jpg";
 
-			var ui = $('<li><img id="cover" src="assets/defaultCover.jpg" class="albumCover" />' 
+			var ui = $('<li><img id="cover" src="' + this.cover + '" class="albumCover" />' 
 			// + '<div class="hash">#</div>' 
 			+ '<div class="rank">' + this.rank + '</div>' 
 			+ '<div class="track">' + this.title + '</div>' 
@@ -215,9 +216,12 @@ div {
 			+ '<a id="spotifyLink"></a>'
 			+ '</li>');
 
-			getAlbumCover(this.artist, this.title, albumCoverHandler);
+			if (!cover) {
+				getAlbumCover(this.artist, this.title, albumCoverHandler);
+			}
+
 			getSpotifyURI(0, this.title, this.artist, currentYear, spotifyURIHandler)
-			getYoutubeVIdeo(this.artist, this.title, youtubeVideoHandler);
+			//getYoutubeVIdeo(this.artist, this.title, youtubeVideoHandler);
 
 			function albumCoverHandler(cover) {
 				if (cover) {
@@ -448,7 +452,7 @@ div {
 	
 .header {
 	text-align: center;
-	height: 275px;
+	height: 325px;
 	width: 100%;
 	background-color: #000000;
 	display: block;
@@ -514,6 +518,8 @@ div.options > div.option {
 
 	<div class="header">
 		<img src="assets/top50.png" />
+	
+		<BR>
 		<div class="headerTitle"></div>
 	
 		<BR>
