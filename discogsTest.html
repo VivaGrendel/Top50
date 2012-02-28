@@ -1,0 +1,73 @@
+<html>
+	<head>
+	    <script type="text/javascript" src="jquery-1.7.1.js"></script>
+	    <script type="text/javascript" src="oauth.js"></script>
+	    <script type="text/javascript" src="sha1.js"></script>
+		<script type="text/javascript">
+$(document).ready(function() {
+	var USER_AGENT			= "VinylesDansLaPoche/0.1 +http://grendel.free.fr";
+	var ROOT				= "http://api.discogs.com";
+	var CONSUMER_KEY		= "LWaSecDcEnrzaHxmLSxq";
+	var CONSUMER_SECRET		= "VoWcrQoFFyMCGnfjzzOWnQpUMXMsaYKg";
+	var REQUEST_TOKEN_URL	= ROOT + "/oauth/request_token";
+	var AUTHORIZE_URL		= "http://www.discogs.com/oauth/authorize";
+	var ACCESS_TOKEN_URL	= ROOT + "/oauth/access_token";
+	var IDENTITY_URL		= ROOT + "/oauth/identity";
+	var HEADERS				= {
+			"Content-Type": "application/x-www-form-urlencoded",
+			"User-Agent": "VinylesDansLaPoche/0.1 +http://grendel.free.fr",
+			"Origin": "localhost"
+		};
+
+  	var oauth = {
+  		action: REQUEST_TOKEN_URL,
+  		method: "POST",
+  		parameters: {
+	  		oauth_consumer_key: CONSUMER_KEY,
+			oauth_signature_method: "HMAC-SHA1", 
+			oauth_signature: "", 
+			oauth_timestamp: "",
+			oauth_nonce: ""    
+  		}
+	};
+
+	var accessor = {
+		consumerSecret: CONSUMER_SECRET,
+		tokenSecret: ""
+	};
+
+	OAuth.setTimestampAndNonce(oauth);
+    OAuth.SignatureMethod.sign(oauth, accessor);
+
+
+	// HEADERS.Authorization = 'OAuth realm="'+ROOT+'", \
+		// oauth_consumer_key="'+CONSUMER_KEY+'", \
+		// oauth_token="'+CONSUMER_SECRET+'", \
+		// oauth_signature_method="HMAC-SHA1", \
+		// oauth_timestamp="137131201", \
+		// oauth_nonce="7d8f3e4a"';
+
+	$.ajax({
+		beforeSend: function(xhr) {
+			xhr.setRequestHeader("User-Agent", USER_AGENT);
+			xhr.setRequestHeader("Origin", "localhost");
+		},
+   		type: "POST",
+		data: oauth.parameters,
+		url: REQUEST_TOKEN_URL,
+		success: function(data){
+			console.debug(data);
+		},
+		complete: function(data){
+			console.debug(data);
+		}
+	});
+
+});
+		</script>
+
+	</head>
+
+	<body>
+	</body>
+</html>

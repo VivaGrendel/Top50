@@ -112,8 +112,8 @@ div {
 		// BILLBOARD API
 		var BILLBOARD_API_KEY	= "y4jsbc3q29xrrmdpf4am84sx";
 		var BILLBOARD_CHART_ID	= "379";
-		var CHARTS_URL			= "http://api.billboard.com/apisvc/chart/v1/list?id=%CHART_ID%&sdate=%YEAR%-%MONTH%-%DAY%&edate=%YEAR%-%MONTH%-%DAY%&api_key=%API_KEY%&format=json";
-		//var CHARTS_URL			= "http://api.billboard.com/apisvc/chart/v1/list?artist=Jackson&sdate=2003-10-10&edate=2008-08-08&api_key=%API_KEY%&format=json";
+		//var CHARTS_URL			= "http://api.billboard.com/apisvc/chart/v1/list?id=%CHART_ID%&sdate=%YEAR%-%MONTH%-%DAY%&edate=%YEAR%-%MONTH%-%DAY%&api_key=%API_KEY%&format=json";
+		var CHARTS_URL			= "http://api.billboard.com/apisvc/chart/v1/list?artist=Jackson&sdate=2003-10-10&edate=2008-08-08&api_key=%API_KEY%&format=json";
 		var CHART_RECORDS_COUNT	= 50;
 		var MAX_CHART_NUM		= 50;
 
@@ -160,46 +160,46 @@ div {
 
 			console.debug("Getting Charts for " + [month, year].join("."));
 
-			getChartROVIO(function(chartItems) {
-					for (var i=0; i<chartItems.length; i++) {
-						var item = chartItems[i];
-						playlist.push(item);
-
-						var li = new ChartItem(i+1, item.title, item.artist, item.cover);
-
-						$("#top50List").append(li.ui());
-					}
-					console.debug(chartItems);
-				}, 
-				year, 
-				month
-			);
-
-			// getChart(function(chartItems) {
-					// var resCount = chartItems.length;
-					// //var resCount = 5;
+			// getChartROVIO(function(chartItems) {
+					// for (var i=0; i<chartItems.length; i++) {
+						// var item = chartItems[i];
+						// playlist.push(item);
 // 
-					// chartItems = chartItems.sort(function(a, b) {           
-						// return a.rank - b.rank;
-					// });
+						// var li = new ChartItem(i+1, item.title, item.artist, item.cover);
 // 
-					// if (resCount > 0) {
-						// var max = Math.min(MAX_CHART_NUM, resCount);
-						// playlist = new Array(max);
-// 
-						// for (var i=0; i<max; i++) {
-							// var item = chartItems[i];
-							// playlist.push(item);
-// 
-							// var li = new ChartItem(item.rank, item.song , item.artist);
-// 
-							// $("#top50List").append(li.ui());
-						// }
+						// $("#top50List").append(li.ui());
 					// }
+					// console.debug(chartItems);
 				// }, 
 				// year, 
 				// month
 			// );
+
+			getChart(function(chartItems) {
+					var resCount = chartItems.length;
+					//var resCount = 5;
+
+					chartItems = chartItems.sort(function(a, b) {           
+						return a.rank - b.rank;
+					});
+
+					if (resCount > 0) {
+						var max = Math.min(MAX_CHART_NUM, resCount);
+						playlist = new Array(max);
+
+						for (var i=0; i<max; i++) {
+							var item = chartItems[i];
+							playlist.push(item);
+
+							var li = new ChartItem(item.rank, item.song , item.artist);
+
+							$("#top50List").append(li.ui());
+						}
+					}
+				}, 
+				year, 
+				month
+			);
 		}
 		
 		var ChartItem = function(rank, title, artist, cover) {
